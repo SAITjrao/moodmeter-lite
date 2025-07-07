@@ -4,15 +4,15 @@ const MAX_LENGTH = 500;
 
 function App() {
   const [text, setText] = useState('');
-  const [result, setResult] = useState('');
+  const [result, setResult] = useState(null); // Change to object/null
   const [loading, setLoading] = useState(false);
   const [warning, setWarning] = useState('');
 
   const analyze = async (e) => {
     e.preventDefault();
-    if (loading) return; // Prevent double submit
+    if (loading) return;
 
-    // prevent input over limit
+    // Validate input length
     if (text.length > MAX_LENGTH) {
       setWarning(`Input too long (max ${MAX_LENGTH} characters).`);
       return;
@@ -26,7 +26,7 @@ function App() {
 
     setWarning('');
     setLoading(true);
-    setResult('');
+    setResult(null);
     try {
       const res = await fetch('http://localhost:5000/analyze', {
         method: 'POST',
@@ -34,9 +34,15 @@ function App() {
         body: JSON.stringify({ text }),
       });
       const data = await res.json();
-      setResult(data.analysis || data.error);
+      let parsed;
+      try {
+        parsed = JSON.parse(data.analysis);
+      } catch {
+        parsed = { raw: data.analysis || data.error };
+      }
+      setResult(parsed);
     } catch (err) {
-      setResult('Error connecting to backend');
+      setResult({ raw: 'Error connecting to backend' });
     }
     setLoading(false);
   };
@@ -69,7 +75,15 @@ function App() {
       )}
       {result && (
         <div style={{ marginTop: 16, padding: 12, background: '#f0f0f0' }}>
-          <strong>Result:</strong> {result}
+          {result.sentiment ? (
+            <>
+              <div><strong>Sentiment:</strong> {result.sentiment}</div>
+              <div><strong>Justification:</strong> {result.justification}</div>
+              <div><strong>Suggestion:</strong> {result.suggestion}</div>
+            </>
+          ) : (
+            <div>{result.raw}</div>
+          )}
         </div>
       )}
     </div>

@@ -25,7 +25,7 @@ app.post('/analyze', async (req, res) => {
     const payload = {
       model: 'gpt-4.1',
       messages: [
-        { role: 'system', content: 'You are a sentiment analyzer. Respond ONLY in JSON with this format: {"sentiment": "Positive|Neutral|Negative", "justification": "...", "suggestion": "..."}',
+        { role: 'system', content: 'You are a sentiment analyzer. Respond ONLY in JSON with this format: {"sentiment": "Positive|Neutral|Negative", "justification": "...", "suggestion": "..."'},
         { role: 'user', content: text }
       ]
     };
